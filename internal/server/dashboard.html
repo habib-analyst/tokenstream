@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>tokenstream — dual-source SSE with lag-budget backpressure</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 960px; padding: 0 1rem; color: #1a1a1a; }
+  h1 { font-size: 1.4rem; margin-bottom: .2rem; }
+  p.sub { color: #555; margin-top: 0; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1 1 400px; }
+  .card h2 { font-size: 1rem; margin-top: 0; }
+  #out { white-space: pre-wrap; word-break: break-word; background: #fafafa; border-radius: 6px; padding: .6rem; min-height: 8rem; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border-bottom: 1px solid #eee; padding: .3rem .5rem; text-align: left; font-size: .9rem; }
+  #stats { font-variant-numeric: tabular-nums; color: #333; }
+  input, button { font-size: .95rem; padding: .35rem .6rem; }
+  button { cursor: pointer; }
+  .resync { color: #b3001b; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>tokenstream</h1>
+<p class="sub">One SSE stream merging live LLM tokens and database change events.
+Token deltas coalesce under backpressure; state events are delivered or resynced — never silently dropped.</p>
+
+<div class="row">
+  <div>
+    <input id="prompt" size="38" placeholder="prompt (label only)" value="summarize the ward round">
+    <button id="start">Start stream</button>
+  </div>
+  <div>
+    <input id="skey" size="12" placeholder="key" value="status">
+    <input id="sval" size="14" placeholder="value" value="critical">
+    <button id="setbtn">Write to store</button>
+  </div>
+</div>
+<p id="stats">frames: 0 · last seq: 0 · resyncs: 0 · status: idle</p>
+
+<div class="row">
+  <div class="card">
+    <h2>Token stream</h2>
+    <pre id="out"></pre>
+  </div>
+  <div class="card">
+    <h2>Watched state</h2>
+    <table id="state"><thead><tr><th>key</th><th>value</th><th>version</th></tr></thead><tbody></tbody></table>
+    <p id="note"></p>
+  </div>
+</div>
+
+<script>
+const out = document.getElementById('out');
+const tbody = document.querySelector('#state tbody');
+const statsEl = document.getElementById('stats');
+const note = document.getElementById('note');
+let frames = 0, resyncs = 0, lastSeq = 0, status = 'idle', es = null;
+
+function renderStats() {
+  statsEl.textContent = 'frames: ' + frames + ' · last seq: ' + lastSeq + ' · resyncs: ' + resyncs + ' · status: ' + status;
+}
+function renderSnapshot(snap) {
+  tbody.replaceChildren();
+  Object.keys(snap).sort().forEach(k => {
+    const tr = document.createElement('tr');
+    [k, snap[k].value, String(snap[k].version)].forEach(v => {
+      const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+function setRow(key, value, version) {
+  const rows = tbody.querySelectorAll('tr');
+  for (const tr of rows) {
+    if (tr.children[0].textContent === key) {
+      tr.children[1].textContent = value;
+      tr.children[2].textContent = String(version);
+      return;
+    }
+  }
+  const tr = document.createElement('tr');
+  [key, value, String(version)].forEach(v => {
+    const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+  });
+  tbody.appendChild(tr);
+}
+function bump(f) { frames++; lastSeq = f.seq; renderStats(); }
+
+document.getElementById('start').onclick = async () => {
+  if (es) { es.close(); }
+  out.textContent = ''; frames = 0; resyncs = 0; lastSeq = 0; status = 'starting';
+  renderStats();
+  const prompt = document.getElementById('prompt').value;
+  const resp = await fetch('/sessions', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({prompt}) });
+  const { id } = await resp.json();
+  status = 'streaming ' + id; renderStats();
+  es = new EventSource('/sessions/' + id + '/stream');
+  es.addEventListener('hello', e => {
+    const f = JSON.parse(e.data); bump(f);
+    out.textContent = f.text || '';
+    if (f.snapshot) renderSnapshot(f.snapshot);
+  });
+  es.addEventListener('token', e => {
+    const f = JSON.parse(e.data); bump(f);
+    out.textContent += f.text;
+  });
+  es.addEventListener('state', e => {
+    const f = JSON.parse(e.data); bump(f);
+    setRow(f.key, f.value, f.version);
+  });
+  es.addEventListener('resync', e => {
+    const f = JSON.parse(e.data); bump(f); resyncs++; renderStats();
+    out.textContent += f.text || '';
+    if (f.snapshot) renderSnapshot(f.snapshot);
+    note.innerHTML = '<span class="resync">resync @ seq ' + f.seq + '</span>: ' + f.reason;
+  });
+  es.addEventListener('done', e => {
+    const f = JSON.parse(e.data); bump(f);
+    status = 'done'; renderStats(); es.close();
+  });
+  es.onerror = () => { status = 'closed'; renderStats(); };
+};
+
+document.getElementById('setbtn').onclick = async () => {
+  const key = document.getElementById('skey').value;
+  const value = document.getElementById('sval').value;
+  await fetch('/store', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({key, value}) });
+};
+</script>
+</body>
+</html>

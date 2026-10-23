@@ -1,0 +1,286 @@
+{
+  "workload": {
+    "Tokens": 300,
+    "RatePerSec": 2000,
+    "Seed": 42,
+    "Burst": 240
+  },
+  "lag_budget_state_events": 48,
+  "slow_client_pacing": "1 byte per 60us (~16.6 KB/s)",
+  "paused_client_pause": "1500ms",
+  "scenarios": [
+    {
+      "scenario": "tokenstream-fast-only",
+      "publisher_ms": 358.27155,
+      "peak_pending_bytes": 68,
+      "peak_lag_events": 2,
+      "heap_before_bytes": 64984,
+      "heap_after_bytes": 289840,
+      "rss_before_bytes": 2719744,
+      "rss_after_bytes": 3874816,
+      "clients": [
+        {
+          "name": "fast-1",
+          "class": "fast",
+          "ttft_ms": 0.512069,
+          "token_interarrival_p50_ms": 1.103627,
+          "token_interarrival_p95_ms": 2.156266,
+          "completion_ms": 358.297099,
+          "frames": 342,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 17,
+            "resyncs": 4,
+            "state_subsumed_by_resync": 196,
+            "frames_written": 341,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 342,
+            "resyncs": 1,
+            "state_events_in_log": 252,
+            "state_events_delivered": 56,
+            "state_events_subsumed_by_resync": 196,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "fast-2",
+          "class": "fast",
+          "ttft_ms": 0.477126,
+          "token_interarrival_p50_ms": 1.100662,
+          "token_interarrival_p95_ms": 2.156496,
+          "completion_ms": 358.270649,
+          "frames": 345,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 14,
+            "resyncs": 4,
+            "state_subsumed_by_resync": 196,
+            "frames_written": 344,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 345,
+            "resyncs": 1,
+            "state_events_in_log": 252,
+            "state_events_delivered": 56,
+            "state_events_subsumed_by_resync": 196,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "tokenstream-mixed",
+      "publisher_ms": 325.562163,
+      "peak_pending_bytes": 6601,
+      "peak_lag_events": 553,
+      "heap_before_bytes": 75752,
+      "heap_after_bytes": 335272,
+      "rss_before_bytes": 4386816,
+      "rss_after_bytes": 4902912,
+      "clients": [
+        {
+          "name": "fast-1",
+          "class": "fast",
+          "ttft_ms": 0.37287,
+          "token_interarrival_p50_ms": 1.09269,
+          "token_interarrival_p95_ms": 1.583947,
+          "completion_ms": 325.575624,
+          "frames": 404,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 5,
+            "resyncs": 3,
+            "state_subsumed_by_resync": 147,
+            "frames_written": 403,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 404,
+            "resyncs": 2,
+            "state_events_in_log": 252,
+            "state_events_delivered": 105,
+            "state_events_subsumed_by_resync": 147,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "fast-2",
+          "class": "fast",
+          "ttft_ms": 0.297377,
+          "token_interarrival_p50_ms": 1.09274,
+          "token_interarrival_p95_ms": 1.582836,
+          "completion_ms": 325.570306,
+          "frames": 452,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 5,
+            "resyncs": 2,
+            "state_subsumed_by_resync": 98,
+            "frames_written": 451,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 452,
+            "resyncs": 1,
+            "state_events_in_log": 252,
+            "state_events_delivered": 154,
+            "state_events_subsumed_by_resync": 98,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "slow-1",
+          "class": "slow",
+          "ttft_ms": 23.226467,
+          "token_interarrival_p50_ms": 20.275848,
+          "token_interarrival_p95_ms": 23.272875,
+          "completion_ms": 582.562465,
+          "frames": 72,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 288,
+            "resyncs": 4,
+            "state_subsumed_by_resync": 196,
+            "frames_written": 71,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 72,
+            "resyncs": 2,
+            "state_events_in_log": 252,
+            "state_events_delivered": 56,
+            "state_events_subsumed_by_resync": 196,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "paused-1",
+          "class": "paused",
+          "ttft_ms": 1499.825276,
+          "token_interarrival_p50_ms": 0.000571,
+          "token_interarrival_p95_ms": 0.012659,
+          "completion_ms": 1499.863954,
+          "frames": 18,
+          "pump": {
+            "offered": 553,
+            "delivered_seq": 553,
+            "last_offered_seq": 553,
+            "lag_events": 0,
+            "coalesced": 288,
+            "resyncs": 5,
+            "state_subsumed_by_resync": 245,
+            "frames_written": 17,
+            "pending_items": 0,
+            "pending_bytes": 0
+          },
+          "audit": {
+            "ok": true,
+            "frames": 18,
+            "resyncs": 2,
+            "state_events_in_log": 252,
+            "state_events_delivered": 7,
+            "state_events_subsumed_by_resync": 245,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "naive-mixed",
+      "publisher_ms": 3115.511294,
+      "clients": [
+        {
+          "name": "fast-1",
+          "class": "fast",
+          "ttft_ms": 11.34177,
+          "token_interarrival_p50_ms": 5.20428,
+          "token_interarrival_p95_ms": 17.913693,
+          "completion_ms": 3111.347065,
+          "frames": 553,
+          "audit": {
+            "ok": true,
+            "frames": 553,
+            "resyncs": 0,
+            "state_events_in_log": 252,
+            "state_events_delivered": 252,
+            "state_events_subsumed_by_resync": 0,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "fast-2",
+          "class": "fast",
+          "ttft_ms": 11.343092,
+          "token_interarrival_p50_ms": 5.203169,
+          "token_interarrival_p95_ms": 17.913313,
+          "completion_ms": 3111.347346,
+          "frames": 553,
+          "audit": {
+            "ok": true,
+            "frames": 553,
+            "resyncs": 0,
+            "state_events_in_log": 252,
+            "state_events_delivered": 252,
+            "state_events_subsumed_by_resync": 0,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        },
+        {
+          "name": "slow-1",
+          "class": "slow",
+          "ttft_ms": 18.143047,
+          "token_interarrival_p50_ms": 5.197049,
+          "token_interarrival_p95_ms": 18.130869,
+          "completion_ms": 3115.510323,
+          "frames": 553,
+          "audit": {
+            "ok": true,
+            "frames": 553,
+            "resyncs": 0,
+            "state_events_in_log": 252,
+            "state_events_delivered": 252,
+            "state_events_subsumed_by_resync": 0,
+            "final_text_ok": true,
+            "final_state_ok": true
+          }
+        }
+      ]
+    }
+  ]
+}
